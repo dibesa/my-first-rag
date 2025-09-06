@@ -2,6 +2,7 @@ import openai
 from dotenv import load_dotenv
 import os
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 class VectorDatabaseInterface(ABC):
     """
@@ -23,6 +24,11 @@ class VectorDatabaseInterface(ABC):
     @abstractmethod
     def print_number_of_embeddings(self) -> None:
         """Print the number of stored embeddings."""
+        pass
+
+    @abstractmethod
+    def load_document_from_path(self, markdown_path: Path) -> None:
+        """Load and process a document into embeddings."""
         pass
 
 class VectorDDBB(VectorDatabaseInterface):
@@ -67,7 +73,7 @@ class VectorDDBB(VectorDatabaseInterface):
             similarities.append((dot_product, i))
         
         similarities.sort(reverse=True, key=lambda x: x[0])
-        
+        s
         return [self.chunks[i] for _, i in similarities[:top_n]]
 
     def nearest_chunks(self, text: str) -> list[str]:
@@ -83,3 +89,12 @@ class VectorDDBB(VectorDatabaseInterface):
         )
         embedding = response.data[0].embedding
         return self._nearest_chunks(embedding)
+
+    def load_document_from_path(self, markdown_path: Path) -> None:
+        """
+        The same than load_document but instead of receiveing the string directly, receives a file path to read into string
+        """
+        with open(markdown_path, 'r') as f:
+            data = f.read()
+
+        self.load_document(data)
