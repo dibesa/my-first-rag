@@ -56,4 +56,30 @@ class VectorDDBB(VectorDatabaseInterface):
     def print_number_of_embeddings(self) -> None:
         """Print the number of stored embeddings"""
         print(len(self.embeddings))
-    
+        
+
+    def _nearest_chunks(self, embedding: [float], top_n: int = 3) -> list[str]:
+        """Return the nearest chunks to the given embedding with the dot product similarity"""
+        # Calculate dot product similarity for each stored embedding
+        similarities = []
+        for i, stored_embedding in enumerate(self.embeddings):
+            dot_product = sum(a * b for a, b in zip(embedding, stored_embedding))
+            similarities.append((dot_product, i))
+        
+        similarities.sort(reverse=True, key=lambda x: x[0])
+        
+        return [self.chunks[i] for _, i in similarities[:top_n]]
+
+    def nearest_chunks(self, text: str) -> list[str]:
+        """
+        Return the nearest chunks to the given text by getting embeddings from the input and
+        calculating similarity with _nearest_chunks function.
+        Args:
+          text: input text to calculate similarity.
+        """
+        response = self.client.embeddings.create(
+            model="openai/text-embedding-3-small",
+            input=text
+        )
+        embedding = response.data[0].embedding
+        return self._nearest_chunks(embedding)
