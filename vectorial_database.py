@@ -73,7 +73,7 @@ class VectorDDBB(VectorDatabaseInterface):
             similarities.append((dot_product, i))
         
         similarities.sort(reverse=True, key=lambda x: x[0])
-        s
+
         return [self.chunks[i] for _, i in similarities[:top_n]]
 
     def nearest_chunks(self, text: str) -> list[str]:
